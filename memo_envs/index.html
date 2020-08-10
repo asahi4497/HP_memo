@@ -1,51 +1,12 @@
-<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>anaconda setup memo</title>
+<title>windows setup memo</title>
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<h1>Vscode のterminal変更方法</h1>
-<p>Vscode のterminalをgit-bashに変更する</p>
-<ul>
-	<li>VScode でctrl + P から　setting.json を検索</li>
-	<li>以下を記述</li>
-	<li>  "terminal.integrated.shell.windows":"C:\\Program Files\\Git\\bin\\bash.exe",</br>
-		"terminal.integrated.shellArgs.windows":["-l"],  </li>
-</ul>
-
-
-
-<h1>Windows の環境setup</del></h1>
-<p>複数のterminal を切り替えられるようにする</del></p>
-<a href ="https://qiita.com/FluffyHernia/items/d2f37a1e90df7b453637">参考サイト</a>
-<p>git-bashとanacondapromptをvscodeで切り替えて使えるようにしたかった</p>
-  <ul>
-		<li>拡張機能[Shell launcher]を入れる　(デフォルトで2つのterminalは切り替えられない)</li>
-		<li>File -> Preferences -> Setting のsetting.json入るに追記する </li>
-		<li><pre><code>
-			"shellLauncher.shells.windows": [
-			{
-				"shell": "C:\\Windows\\sysnative\\cmd.exe",
-				"label": "cmd"
-			},
-			{
-				"shell": "C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell.exe",
-				"label": "PowerShell"
-			},
-			{
-				"shell": "C:\\Program Files\\Git\\bin\\bash.exe",
-				"label": "Git bash"
-			},
-			{
-				"shell": "C:\\Windows\\sysnative\\bash.exe",
-				"label": "WSL Bash"
-			}</code></pre></li>
-		<li>設定を変えたら ctrl + shift + p のコマンドパレットで　「Shell launcher」で検索、選択するとshell の候補が出てくる</li>
-		<li>keyboardsetting でショートカットキーを指定すると楽 (ctrl + shift + 1 に設定した)</li>
-		
-　</ul>
-
+<h1>windows のsetup</del></h1>
+<p></del></p>
+<a href = "./multi_terminal.html">terminalを複数持つためのメモ</a>
 </body>
 </html> 
