@@ -1,0 +1,195 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>unity ML-Agents start setup</title>
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+<h1>unity でML-agentsの使い方セットアップ</del></h1>
+<p>Unity で強化学習の使い方</del></p>
+<a href = "https://github.com/Unity-Technologies/ml-agents/blob/0.13.1/docs/Learning-Environment-Create-New.md">参考にしたサイト</a></br>
+<a href = "https://note.com/jigusou/n/n656863957b1e">参考にしたサイト2</a>
+  <ol type = "1">
+        <li>unity と anaconda のml-agentsの設定は終わらせておく</li>
+        <li>unity のversion2019.3.13f1でプロジェクトを作る</li>
+        <li>unity で　window -> Pachage Manager でshow preview package を選択。Barracudaを検索し「preview - 0.4.0」をインストール</li>
+        <li>unity で　file -> build setting -> Player setting -> playerのother setting のConfigurationの「Api Compatibility Level」を「.NET 4.X」の変更</li>
+        <li>unity のプロジェクトのAssets に以下を追加
+            <ul>
+                <li>ml-agents 元データのml-agents-0.13.1　-> UnitySDK->Assets 内のML-Agents</li>
+            </ul>
+        </li>
+        <li>unity のプロジェクト内(Assetsとかがあるディレクトリ)に以下を追加
+            <ul>
+                ml-agents 元データのml-agents-0.13.1の
+                <li>config</li>
+                <li>ml-agents</li>
+                <li>ml-agents-envs</li>
+            </ul>
+        </li>
+　</ol>
+<p>以下自作テストプロジェクトの進め方</p>
+<ol type = "1">
+    <li>GameObjectの追加
+        <ul>
+            <li>Plane(->Floor)</li>
+            <li>Cube(->Target)</li>
+            <li>Sphere(->RollerAgent)</li>
+            <li>Create Empty(->Academy)</li>
+        </ul>
+    </li>
+    <li>Script の追加
+        <ul>
+            <li>RollerAgentにRigidbodを追加</li>
+            <li>Academyにスクリプトを追加(->RollerAcademy)
+                <pre>
+                    using System.Collections;
+                    using System.Collections.Generic;
+                    using UnityEngine;
+                    using MLAgents;
+
+                    public class RollerAcademy : Academy
+                    {
+                    }
+                </pre>
+            </li>
+            <li>RollerAgentにスクリプトを追加(->RollerAgent)
+                <pre>
+                    using System.Collections;
+                    using System.Collections.Generic;
+                    using UnityEngine;
+                    using MLAgents;
+
+                    public class RollerAgent : Agent
+                    {
+                        Rigidbody rBody;
+                        void Start()
+                        {
+                            rBody = GetComponent<Rigidbody>();        
+                        }
+
+                        public Transform Target;
+                        public override void AgentReset()
+                        {
+                            if(this.transform.localPosition.y <0)
+                            {
+                                //if the agent fell, zero its momentum
+                                this.rBody.angularVelocity = Vector3.zero;
+                                this.rBody.velocity = Vector3.zero;
+                                this.transform.localPosition = new Vector3(0, 05f, 0);
+                            }
+
+                            //move the target to new spot
+                            Target.localPosition = new Vector3(Random.value * 8 - 4, 0.5f, Random.value * 8 - 4);
+                        }
+
+                        public override void CollectObservations()
+                        {
+                            //target and agent  positions
+                            AddVectorObs(Target.localPosition);
+                            AddVectorObs(this.transform.localPosition);
+
+                            //agents velocity
+                            AddVectorObs(rBody.velocity.x);
+                            AddVectorObs(rBody.velocity.z);
+                        }
+
+                        public float speed = 10;
+                        public override void AgentAction(float[] vectorAction)
+                        {
+                            //actions, size=2
+                            Vector3 controlSignal = Vector3.zero;
+                            controlSignal.x = vectorAction[0];
+                            controlSignal.z = vectorAction[1];
+                            rBody.AddForce(controlSignal * speed);
+
+                            //rewards
+                            float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
+
+
+                            //reached target
+                            if(distanceToTarget < 1.42f)
+                            {
+                                SetReward(1.0f);
+                                Done();
+                            }
+
+                            //fell off platform
+                            if(this.transform.localPosition.y <0)
+                            {
+                                Done();
+                            }
+                        }
+
+                        //for move test without machine learning
+                        public override float[] Heuristic()
+                        {
+                            var action = new float[2];
+                            action[0] = Input.GetAxis("Horizontal");
+                            action[1] = Input.GetAxis("Vertical");
+                            return action;
+                        }
+
+                    }
+
+                </pre>
+            </li>
+            <li>RollerAgentにAd Component から「Behavior Parameters」を検索し、追加
+                <ul>
+                    <li>Behavior Name をRollerBallBrainに変更しとく</li>
+                    <li>Vector ObservationのSpace Sizeを8に設定</li>
+                    <li>Vector Action のSpace Type をContinuousに変更</li>
+                </ul>
+            </li>
+            <li>RollerAgentスクリプトの設定
+                <ul>
+                    <li>Targetに「Target」を指定</li>
+                    <li>Decision Interval を10に指定しておく</li>
+                </ul>
+            </li>
+        </ul>
+    </ol>
+    <ol type ="1">
+    </li>
+    この段階で矢印キーで動かしてテストしてみる。
+    <p>prefab化して同時進行し効率を上げる</p>
+    <ol type="1">
+        <li>create empty (->TraningArea)</li>
+        <li>Floor ,Target ,RollerAgentをTraningAreaに追加→TraningAreaをprojectに入れprefab化する</li>
+        <li>prefabを重ならないように配置すると同時進行で効率的にできる(各初期値に注意,localPositionにするなどする)</li>
+    </ol>
+    <p>terminalから機械学習を動かす</p>
+    <li>anacondapromptで作ったmlagentを起動
+        <pre>
+            conda activate mlagent
+        </pre>
+    </li>
+    <li>プロジェクトのディレクトリに移動(configのあるところ)</li>
+    <li>以下のコードを実行
+        <pre>mlagents-learn ./config/trainer_config.yaml --run-id=firstRun --train</pre>
+    </li>
+    <li>terminal でunityを再生をするように支持されるのでunityで再生すると学習が開始される(run-idが同じものがあると追加されるので、毎回変えるかかぶる名前は消す)</li>
+    <li>試行回数等はconfigのtrainer_config.yamlを編集する(max_stepsなど)</li>
+    </ol>
+    <p>進行状況の確認方法</p>
+    <ol type="1">
+        <li>anacondapromptで作ったmlagentを起動
+            <pre>
+                conda activate mlagent
+            </pre>
+        </li>
+        <li>プロジェクトを実行したディレクトリで以下のコードを実行
+            <pre>
+                tensorboard --logdir=summaries --port=6006
+            </pre>
+        </li>
+        <li>chorm などで「lcalhost:6006」と検索するとみれる(6006は上のコードで指定したport番号)</li>
+    </ol>
+    <p>学習結果を使う</p>
+    <ol>
+        <li>実行したディレクトリのmodels無いから実行したidのディレクトリ内から*.nnファイルをとってくる</li>
+        <li>Assetsディレクトリにコピーまたは移動させる</li>
+        <li>実行したいAgentのbehavior Parametersのmodelにファイルを入れて実行すると学習した結果で実行される</li>
+    </ol>
+</body>
+</html> 

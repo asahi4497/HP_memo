@@ -1,0 +1,89 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>amazon ec2 memo</title>
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+<h1>amazon のintern試験でやったec2の環境構築とsetup</del></h1>
+<p>課題1: http://IPアドレス/ でアクセスしたときに"AMAZON"と表示させる</del></p>
+<ul>
+	<li>php7.3を入れようと思ったらapache(httpd)のバージョンが古くエラーになったので更新</br>
+		<pre>
+			$ sudo yum remove -y httpd
+			$ sudo yum remove -y httpd-tools
+			$ sudo yum install -y httpd24
+			$ sudo service httpd start
+		</pre>
+	</li>
+	<li>apacheの起動
+		<pre>
+			$ service httpd start
+		</pre>
+	</li>
+	<li>自動起動設定
+		<pre>
+			$ chkconfig httpd on
+		</pre>
+	</li>
+	<li>/var/www/html/にindex.htmlを設置し、AMAZONと記述</li>
+</ul>
+
+<p>課題2: http://IPアドレス/secret/ にアクセスしたときにベーシック認証が起動するようにする</p>
+<ul>
+	<li>鍵作成
+		<pre>
+			$ sudo htpasswd -c -b /etc/httpd/conf/.htpasswd user pass
+		</pre>
+	</li>
+	<li>BASIC認証の設定(/etc/httpd/conf/httpd.conf)
+		<pre>
+			$ &lt;Directory "/var/www/html/"&gt;
+			$ AuthUserFile /etc/httpd/conf/.htpasswd
+			$ AuthGroupFile /dev/null
+			$ AuthName "Basic Auth"
+			$ AuthType Basic
+			$ Require valid-user
+			$ &lt;/Directory&gt;
+		</pre>
+	</li>
+	<li>apacheの再起動
+		<pre>
+			$ /etc/init.d/httpd restart
+		</pre>
+	</li>
+</ul>
+
+<p>課題3: 四則演算をする</p>
+<ul>
+	<li>Apacheでcgiの指定をする(/etc/httpd/conf/httpd.conf)
+		<pre>
+			$ ScriptAlias /cgi-bin/calc /var/www/cgi-bin/calc.sh
+			$ AddHandler cgi-script .cgi .sh
+		</pre>
+		を追記
+	</li>
+	<li>httpd.conf内で指定したファイルを作成(/var/www/cgi-bin/calc.sh)
+		<pre>
+			$ #! /bin/bash
+			$ 
+			$ echo "Content-type:text/plain"
+			$ echo
+			$ input=${QUERY_STRING}
+			$
+			$ output="`echo \"$input\" | bc`"
+			$ output2=$(($output*-1))
+			$ if [[ "$output" =~ ^[0-9]+$ ]]; then
+			$ 	echo "`echo \"$input\" | bc`"
+			$ elif [[ "$output2" =~ ^[0-9]+$ ]]; then
+			$ 	echo "`echo \"$input\" | bc`"
+			$ else 
+			$	echo "ERROR"
+			$ fi
+		</pre>
+	</li>
+	<li>作成したファイルに権限を与える　chmod 755 calc.sh</li>
+</ul>
+
+</body>
+</html> 

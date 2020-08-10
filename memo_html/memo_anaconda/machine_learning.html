@@ -1,0 +1,48 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>machine Leaning setup memo</title>
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+<h1>machine Learning のsetup</del></h1>
+<p>Unity で強化学習のsetup</del></p>
+<a href = "https://note.com/npaka/n/n2aec1a398694">参考にしたサイト</a></br>
+<a href = "https://qiita.com/y-sakai/items/c23feefdd52cc45209e6">参考にしたサイト2</a>
+  <ol type = "1">
+        <li>Unity と　anaconda でpythonのsetup は終わらせておく</li>
+        <li>ML-Agents0.13.1 をダウンロードする　<a href = "https://github.com/Unity-Technologies/ml-agents.git">https://github.com/Unity-Technologies/ml-agents.git</a> masterのタグの中から探す</li>
+        <li>Unity の2019.3...でプロジェクトを作る(2020...だと仕様が違う、2020..で作ってからダウングレードもバグるから注意)</li>
+        <li>ml-agentsを解凍してフォルダを取り出す。</br>
+            ファイル内のconfig,ml-agents,ml-agents-envsをUnityで作ったプロジェクトのAssetsと同じディレクトリにコピー</br>
+            ファイル内のUnitySDK内のAssets内のML-AgentsをUnityのプロジェクト内のAssetsの中にコピー</li>
+        <li>pythonの環境設定をする</br>
+            Anaconda promptで以下のコードを入力
+        <pre>
+            conda create -n mlagents python=3.7
+            conda activate mlagents
+            pip install pandas
+            pip install gym
+            pip install mlagents=0.13.1
+        </pre></li>
+        <li>Unity のメニューから「File->Build Settings..」->「player Settings...」から「Other Settings」の「Api Compatibility Level」で「.Net 4.x」を選択</li>
+        <li>メニューの「wnindow ->Package Manager」の「Advanced ->Show Preview Packages」の中から「Barracuda 0.4.0」を入れる（version に注意　最新だと合わなかったりする）　メニューからプロジェクトを保存しておく</li>
+        <li>サンプルを動かす</br>
+            「Assets/ML-Agents/Examples/」の中から好きなものを選んで「Scene」の中を開く</li>
+        <li>pythonスクリプトで学習</br>
+            anaconda prompt でconda activate mlagentsした後configファイルのあるディレクトリで
+            <pre>
+                mlagents-learn <学習コンフィグファイルのパス> --run-id=<実行ID> --train</br>
+                具体的には
+                mlagents-learn ./config/trainer_config.yaml --run-id=firstRun --train 
+            </pre>
+            を実行。UnityのLogoが出て、playボタンを押せと言われたらUnityで再生ボタンを押す。そしたら、学習が始まり、terminalにlogが表示される</li>
+        <li>推論モデルがAssetsと同じディレクトリの「models/firstRun-0/[名前].nn」ができる。学習が終わったらAssetsの中に入れておく</li>
+        <li>UnityのProjectウィンドウで「Assets/ML-Agents/Examle/.../Prefabs」から学習させたprefabを選択</br>
+            プレハブ内の「Agent」のinspectorからBehavior ParametersのModelを学習結果の.nnに交換して再生すると推論が実行される</li>
+        
+        <img src="image.png" title="Unity">
+        
+　</ol>
+</body>
+</html> 
